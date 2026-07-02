@@ -7,39 +7,10 @@ st.set_page_config(page_title="Wade's Super Calculator", layout="wide")
 st.title("Wade's Superannuation Projection Calculator")
 st.markdown("Project your super balance factoring in SGC scaling, salary growth, and compliance.")
 
-# Dictionary of Annual Salaries (Fortnightly * 26) - 2026/27 Rates
-pay_scale = {
-    "Constable 1": 3009.10 * 26,
-    "Constable 2": 3096.20 * 26,
-    "Constable 3": 3229.00 * 26,
-    "Constable 4": 3361.50 * 26,
-    "Constable 5": 3547.10 * 26,
-    "Constable 6": 3699.90 * 26,
-    "Senior Constable 1": 3699.90 * 26,
-    "Senior Constable 2": 3785.10 * 26,
-    "Senior Constable 3": 3872.50 * 26,
-    "Senior Constable 4": 3961.90 * 26,
-    "Senior Constable 5": 4052.30 * 26,
-    "Senior Constable 6": 4145.50 * 26,
-    "Senior Constable 7": 4241.30 * 26,
-    "Senior Constable 8": 4338.70 * 26,
-    "Senior Constable 9": 4438.10 * 26,
-    "Senior Constable 10": 4527.80 * 26,
-}
-
 # Sidebar Controls
 st.sidebar.header("Standard Assumptions")
-pay_point = st.sidebar.selectbox("Select QPS Paypoint (26/27)", options=list(pay_scale.keys()))
-osa_toggle = st.sidebar.toggle("Include OSA (21%)", value=True)
-
-# Calculate base based on selection
-base_val = pay_scale[pay_point]
-calculated_salary = base_val * 1.21 if osa_toggle else base_val
-
-# Editable Salary Input (Defaults to calculated, but allows manual override)
-salary = st.sidebar.number_input("Annual Salary ($)", value=calculated_salary, step=1000)
-
 starting_balance = st.sidebar.number_input("Starting Balance ($)", value=100000, step=1000)
+salary = st.sidebar.number_input("Annual Salary ($)", value=100000, step=1000)
 current_age = st.sidebar.slider("Current Age", 18, 75, 30)
 retirement_age = st.sidebar.slider("Retirement Age", current_age, 85, 60)
 time_horizon = retirement_age - current_age
@@ -81,6 +52,7 @@ data = []
 current_bal = starting_balance
 curr_salary = salary
 curr_sacrifice = initial_sacrifice_amount
+cumulative_contributions = 0
 
 for yr in range(1, time_horizon + 1):
     # Grow salary and sacrifice for this year
@@ -92,6 +64,11 @@ for yr in range(1, time_horizon + 1):
     
     # Determine if lump sum applies
     injection = lump_sum if yr == lump_sum_year else 0
+    
+    # Calculate contributions for cumulative tracking
+    # (Employer + Sacrifice + Extra)
+    annual_raw_contributions = employer_cont + curr_sacrifice + extra_contribution
+    cumulative_contributions += annual_raw_contributions
     
     # Deduct costs, add net concessional (15% tax) + after-tax extra contribution
     net_cont = ((employer_cont + curr_sacrifice) * 0.85) - admin_fee - insurance_premium + extra_contribution
@@ -105,7 +82,8 @@ for yr in range(1, time_horizon + 1):
     data.append({
         "Year": yr,
         "Nominal Balance ($)": current_bal,
-        "Real Purchasing Power ($)": real_bal
+        "Real Purchasing Power ($)": real_bal,
+        "Cumulative Contributions ($)": cumulative_contributions
     })
 
 df = pd.DataFrame(data)
@@ -117,7 +95,8 @@ st.line_chart(df.set_index("Year")[["Nominal Balance ($)", "Real Purchasing Powe
 st.subheader("Summary Projection")
 st.dataframe(df.style.format({
     "Nominal Balance ($)": "${:,.0f}",
-    "Real Purchasing Power ($)": "${:,.0f}"
+    "Real Purchasing Power ($)": "${:,.0f}",
+    "Cumulative Contributions ($)": "${:,.0f}"
 }))
 
 st.markdown("---")
