@@ -32,15 +32,12 @@ st.sidebar.header("Standard Assumptions")
 pay_point = st.sidebar.selectbox("Select QPS Paypoint (26/27)", options=list(pay_scale.keys()))
 osa_toggle = st.sidebar.toggle("Include OSA (21%)", value=True)
 
-# Logic to handle syncing the salary from the dropdown
-if 'salary' not in st.session_state:
-    st.session_state.salary = pay_scale[pay_point] * 1.21
+# Calculate base based on selection
+base_val = pay_scale[pay_point]
+calculated_salary = base_val * 1.21 if osa_toggle else base_val
 
-if st.sidebar.button("Update Salary from Paypoint"):
-    st.session_state.salary = pay_scale[pay_point] * (1.21 if osa_toggle else 1)
-
-salary = st.sidebar.number_input("Annual Salary ($)", value=st.session_state.salary, step=1000)
-st.session_state.salary = salary # Keep session state updated for manual overrides
+# Editable Salary Input (Defaults to calculated, but allows manual override)
+salary = st.sidebar.number_input("Annual Salary ($)", value=calculated_salary, step=1000)
 
 starting_balance = st.sidebar.number_input("Starting Balance ($)", value=100000, step=1000)
 current_age = st.sidebar.slider("Current Age", 18, 75, 30)
@@ -52,7 +49,7 @@ st.sidebar.markdown(f"**Time Horizon:** {time_horizon} years")
 employer_rate = st.sidebar.slider("Employer SGC Rate (%)", 10.0, 18.0, 11.5, step=0.5) / 100
 sacrifice_percentage = st.sidebar.slider("Salary Sacrifice (%)", 0.0, 15.0, 0.0, step=0.5) / 100
 
-# Cap Compliance Check
+# Cap Compliance Check (Initial)
 # Note: 2026-27 concessional cap is $32,500
 CONCESSIONAL_CAP = 32500
 employer_cont_init = salary * employer_rate
@@ -84,7 +81,6 @@ data = []
 current_bal = starting_balance
 curr_salary = salary
 curr_sacrifice = initial_sacrifice_amount
-cumulative_contributions = 0
 
 for yr in range(1, time_horizon + 1):
     # Grow salary and sacrifice for this year
@@ -96,11 +92,6 @@ for yr in range(1, time_horizon + 1):
     
     # Determine if lump sum applies
     injection = lump_sum if yr == lump_sum_year else 0
-    
-    # Calculate contributions for cumulative tracking
-    # (Employer + Sacrifice + Extra)
-    annual_raw_contributions = employer_cont + curr_sacrifice + extra_contribution
-    cumulative_contributions += annual_raw_contributions
     
     # Deduct costs, add net concessional (15% tax) + after-tax extra contribution
     net_cont = ((employer_cont + curr_sacrifice) * 0.85) - admin_fee - insurance_premium + extra_contribution
@@ -114,8 +105,7 @@ for yr in range(1, time_horizon + 1):
     data.append({
         "Year": yr,
         "Nominal Balance ($)": current_bal,
-        "Real Purchasing Power ($)": real_bal,
-        "Cumulative Contributions ($)": cumulative_contributions
+        "Real Purchasing Power ($)": real_bal
     })
 
 df = pd.DataFrame(data)
@@ -127,8 +117,7 @@ st.line_chart(df.set_index("Year")[["Nominal Balance ($)", "Real Purchasing Powe
 st.subheader("Summary Projection")
 st.dataframe(df.style.format({
     "Nominal Balance ($)": "${:,.0f}",
-    "Real Purchasing Power ($)": "${:,.0f}",
-    "Cumulative Contributions ($)": "${:,.0f}"
+    "Real Purchasing Power ($)": "${:,.0f}"
 }))
 
 st.markdown("---")
