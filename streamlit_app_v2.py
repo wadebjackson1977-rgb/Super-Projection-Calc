@@ -13,16 +13,17 @@ starting_balance = st.sidebar.number_input("Starting Balance ($)", value=100000,
 gross_contribution = st.sidebar.number_input("Gross Annual Contribution ($)", value=25000, step=500)
 
 st.sidebar.markdown("---")
-st.sidebar.header("Contributions and Returns")
+st.sidebar.header("Adjustment Sliders")
 contribution_growth = st.sidebar.slider("Annual Contribution Growth (%)", 0.0, 10.0, 3.0) / 100
-time_horizon = st.sidebar.slider("Time Horizon (Years)", 5, 40, 10)
+extra_contribution = st.sidebar.slider("Extra After-Tax Contribution ($)", 0, 26000, 0, step=250)
+time_horizon = st.sidebar.slider("Time Horizon (Years)", 5, 30, 10)
 cust_return = st.sidebar.slider("Return Rate (%)", 0.0, 20.0, 10.07) / 100
 inflation_rate = st.sidebar.slider("Annual Inflation Rate (%)", 0.0, 5.0, 3.0) / 100
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("Advanced Settings")
-admin_fee = st.sidebar.number_input("Annual Admin Fee ($)", value=560, step=10)
-insurance_premium = st.sidebar.number_input("Annual Insurance Premiums ($)", value=2220, step=50)
+admin_fee = st.sidebar.number_input("Annual Admin Fee ($)", value=557, step=10)
+insurance_premium = st.sidebar.number_input("Annual Insurance Premiums ($)", value=2220, step=10)
 lump_sum = st.sidebar.number_input("One-off Lump Sum Injection ($)", value=0, step=1000)
 lump_sum_year = st.sidebar.number_input("Year of Lump Sum Injection", value=1, min_value=1, max_value=time_horizon, step=1)
 
@@ -35,8 +36,8 @@ for yr in range(1, time_horizon + 1):
     # Determine if lump sum applies this year
     injection = lump_sum if yr == lump_sum_year else 0
     
-    # Deduct costs, add net contribution (15% tax)
-    net_cont = (cont * 0.85) - admin_fee - insurance_premium
+    # Deduct costs, add net contribution (15% tax) + after-tax extra contribution
+    net_cont = (cont * 0.85) - admin_fee - insurance_premium + extra_contribution
     
     # Apply growth (including injection)
     current_bal = (current_bal + net_cont + injection) * (1 + cust_return)
@@ -59,8 +60,12 @@ st.subheader("Projection Chart")
 st.line_chart(df.set_index("Year"))
 
 st.subheader("Summary Projection")
-st.dataframe(df.style.format("${:,.0f}"))
+# Format only the money columns
+st.dataframe(df.style.format({
+    "Nominal Balance ($)": "${:,.0f}",
+    "Real Purchasing Power ($)": "${:,.0f}"
+}))
 
 st.markdown("---")
 st.write("**Note:** This projection accounts for annual fee/insurance erosion and contribution taxes. Remember to review Division 296 rules if your nominal balance crosses $3,000,000.")
-st.write("**Note:** The fees pre populated are indicative of fees payable by a QPS officer with a Qsuper account.")
+st.write("**Note:** The prepopulated Insurance and Fees are indicative of a QPS Officer with a QSuper account")
