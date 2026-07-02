@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 
 # Page Config
-st.set_page_config(page_title="Advanced Super Calculator", layout="wide")
+st.set_page_config(page_title="Wade's Super Calculator", layout="wide")
 
-st.title("Advanced Superannuation Projection Calculator")
+st.title("Wade's Superannuation Projection Calculator")
 st.markdown("Project your super balance factoring in SGC scaling, salary growth, and compliance.")
 
 # Sidebar Controls
@@ -84,3 +84,4 @@ st.dataframe(df.style.format({
 
 st.markdown("---")
 st.write("**Note:** This projection accounts for annual fee/insurance erosion and contribution taxes. Remember to review Division 296 rules if your nominal balance crosses $3,000,000.")
+st.caption("The prepopulated Fees and Insurance figures are indicative of a QPS officer with a Qsuper Account.")
