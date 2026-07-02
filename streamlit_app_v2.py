@@ -63,3 +63,4 @@ st.dataframe(df.style.format("${:,.0f}"))
 
 st.markdown("---")
 st.write("**Note:** This projection accounts for annual fee/insurance erosion and contribution taxes. Remember to review Division 296 rules if your nominal balance crosses $3,000,000.")
+st.write("**Note:** The fees pre populated are indicative of fees payable by a QPS officer with a Qsuper account.")
