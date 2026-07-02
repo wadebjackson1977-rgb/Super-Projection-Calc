@@ -12,11 +12,13 @@ st.sidebar.header("Standard Assumptions")
 starting_balance = st.sidebar.number_input("Starting Balance ($)", value=100000, step=1000)
 salary = st.sidebar.number_input("Annual Salary ($)", value=100000, step=1000)
 employer_rate = st.sidebar.slider("Employer SGC Rate (%)", 10.0, 18.0, 11.5, step=0.5) / 100
-gross_contribution = st.sidebar.number_input("Annual Salary Sacrifice ($)", value=0, step=500)
+sacrifice_percentage = st.sidebar.slider("Salary Sacrifice (%)", 0.0, 100.0, 0.0, step=0.5) / 100
 
 # Cap Compliance Check (Initial)
 employer_cont_init = salary * employer_rate
-total_concessional_init = gross_contribution + employer_cont_init
+initial_sacrifice_amount = salary * sacrifice_percentage
+total_concessional_init = initial_sacrifice_amount + employer_cont_init
+
 if total_concessional_init > 30000:
     st.sidebar.error(f"⚠️ Initial Total Concessional Contribution (${total_concessional_init:,.0f}) exceeds the $30,000 cap!")
 else:
@@ -42,7 +44,7 @@ lump_sum_year = st.sidebar.number_input("Year of Lump Sum Injection", value=1, m
 data = []
 current_bal = starting_balance
 curr_salary = salary
-curr_sacrifice = gross_contribution
+curr_sacrifice = initial_sacrifice_amount
 
 for yr in range(1, time_horizon + 1):
     # Grow salary and sacrifice for this year
