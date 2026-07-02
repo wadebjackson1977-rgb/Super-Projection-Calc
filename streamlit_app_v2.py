@@ -92,9 +92,6 @@ df = pd.DataFrame(data)
 st.subheader("Projected Balance Over Time")
 st.line_chart(df.set_index("Year")[["Nominal Balance ($)", "Real Purchasing Power ($)"]])
 
-st.subheader("Cumulative Growth vs. Contributions")
-st.line_chart(df.set_index("Year")[["Nominal Balance ($)", "Cumulative Contributions ($)"]])
-
 st.subheader("Summary Projection")
 st.dataframe(df.style.format({
     "Nominal Balance ($)": "${:,.0f}",
