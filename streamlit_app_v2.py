@@ -14,7 +14,7 @@ starting_balance = st.sidebar.number_input("Starting Balance ($)", value=100000,
 st.sidebar.markdown("---")
 st.sidebar.header("Employment & Compliance")
 salary = st.sidebar.number_input("Annual Salary ($)", value=100000, step=1000)
-employer_rate = st.sidebar.slider("Employer SGC Rate (%)", 10.0, 15.0, 11.5, step=0.5) / 100
+employer_rate = st.sidebar.slider("Employer SGC Rate (%)", 10.0, 18.0, 11.5, step=0.5) / 100
 gross_contribution = st.sidebar.number_input("Voluntary Salary Sacrifice ($)", value=0, step=500)
 
 # Cap Compliance Check
