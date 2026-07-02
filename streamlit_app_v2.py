@@ -21,12 +21,14 @@ employer_rate = st.sidebar.slider("Employer SGC Rate (%)", 10.0, 18.0, 11.5, ste
 sacrifice_percentage = st.sidebar.slider("Salary Sacrifice (%)", 0.0, 15.0, 0.0, step=0.5) / 100
 
 # Cap Compliance Check (Initial)
+# Note: 2026-27 concessional cap is $32,500
+CONCESSIONAL_CAP = 32500
 employer_cont_init = salary * employer_rate
 initial_sacrifice_amount = salary * sacrifice_percentage
 total_concessional_init = initial_sacrifice_amount + employer_cont_init
 
-if total_concessional_init > 32500:
-    st.sidebar.error(f"⚠️ Initial Total Concessional Contribution (${total_concessional_init:,.0f}) exceeds the $32,500 cap!")
+if total_concessional_init > CONCESSIONAL_CAP:
+    st.sidebar.error(f"⚠️ Initial Total Concessional Contribution (${total_concessional_init:,.0f}) exceeds the ${CONCESSIONAL_CAP:,.0f} cap!")
 else:
     st.sidebar.success(f"Initial Total Concessional Contribution: ${total_concessional_init:,.0f}")
 
@@ -35,7 +37,7 @@ st.sidebar.header("Adjustment Sliders")
 salary_growth = st.sidebar.slider("Annual Salary Increase (%)", 0.0, 10.0, 3.0) / 100
 contribution_growth = st.sidebar.slider("Annual Sacrifice Increase (%)", 0.0, 10.0, 3.0) / 100
 extra_contribution = st.sidebar.slider("Extra After-Tax Contribution ($)", 0, 50000, 0, step=1000)
-cust_return = st.sidebar.slider("Return Rate - Refer to Note (%)", 0.0, 20.0, 10.07) / 100
+cust_return = st.sidebar.slider("Return Rate (%)", 0.0, 20.0, 10.07) / 100
 inflation_rate = st.sidebar.slider("Annual Inflation Rate (%)", 0.0, 5.0, 3.0) / 100
 
 st.sidebar.markdown("---")
@@ -50,6 +52,7 @@ data = []
 current_bal = starting_balance
 curr_salary = salary
 curr_sacrifice = initial_sacrifice_amount
+cumulative_contributions = 0
 
 for yr in range(1, time_horizon + 1):
     # Grow salary and sacrifice for this year
@@ -61,6 +64,11 @@ for yr in range(1, time_horizon + 1):
     
     # Determine if lump sum applies
     injection = lump_sum if yr == lump_sum_year else 0
+    
+    # Calculate contributions for cumulative tracking
+    # (Employer + Sacrifice + Extra)
+    annual_raw_contributions = employer_cont + curr_sacrifice + extra_contribution
+    cumulative_contributions += annual_raw_contributions
     
     # Deduct costs, add net concessional (15% tax) + after-tax extra contribution
     net_cont = ((employer_cont + curr_sacrifice) * 0.85) - admin_fee - insurance_premium + extra_contribution
@@ -74,22 +82,26 @@ for yr in range(1, time_horizon + 1):
     data.append({
         "Year": yr,
         "Nominal Balance ($)": current_bal,
-        "Real Purchasing Power ($)": real_bal
+        "Real Purchasing Power ($)": real_bal,
+        "Cumulative Contributions ($)": cumulative_contributions
     })
 
 df = pd.DataFrame(data)
 
 # Visuals
-st.subheader("Projection Chart")
-st.line_chart(df.set_index("Year"))
+st.subheader("Projected Balance Over Time")
+st.line_chart(df.set_index("Year")[["Nominal Balance ($)", "Real Purchasing Power ($)"]])
+
+st.subheader("Cumulative Growth vs. Contributions")
+st.line_chart(df.set_index("Year")[["Nominal Balance ($)", "Cumulative Contributions ($)"]])
 
 st.subheader("Summary Projection")
 st.dataframe(df.style.format({
     "Nominal Balance ($)": "${:,.0f}",
-    "Real Purchasing Power ($)": "${:,.0f}"
+    "Real Purchasing Power ($)": "${:,.0f}",
+    "Cumulative Contributions ($)": "${:,.0f}"
 }))
 
 st.markdown("---")
 st.write("**Note:** This projection accounts for annual fee/insurance erosion and contribution taxes. Remember to review Division 296 rules if your nominal balance crosses $3,000,000.")
 st.write("**Note:** The prepopulated Fees and Insurance figures are indicative of a QPS officer with a Qsuper Account.")
-st.write("**Note:** The 30yr average annual returns for a 'Growth' Fund is approx 8%.  Balanced is around 6-7%")
