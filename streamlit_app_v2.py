@@ -35,7 +35,7 @@ st.sidebar.header("Adjustment Sliders")
 salary_growth = st.sidebar.slider("Annual Salary Increase (%)", 0.0, 10.0, 3.0) / 100
 contribution_growth = st.sidebar.slider("Annual Sacrifice Increase (%)", 0.0, 10.0, 3.0) / 100
 extra_contribution = st.sidebar.slider("Extra After-Tax Contribution ($)", 0, 50000, 0, step=1000)
-cust_return = st.sidebar.slider("Return Rate (%)", 0.0, 20.0, 10.07) / 100
+cust_return = st.sidebar.slider("Return Rate - Refer to Note (%)", 0.0, 20.0, 10.07) / 100
 inflation_rate = st.sidebar.slider("Annual Inflation Rate (%)", 0.0, 5.0, 3.0) / 100
 
 st.sidebar.markdown("---")
