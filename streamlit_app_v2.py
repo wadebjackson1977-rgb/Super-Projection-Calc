@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 
 # Page Config
 st.set_page_config(page_title="Wade's Super Calculator", layout="wide")
@@ -21,7 +22,6 @@ employer_rate = st.sidebar.slider("Employer SGC Rate (%)", 10.0, 18.0, 11.5, ste
 sacrifice_percentage = st.sidebar.slider("Salary Sacrifice (%)", 0.0, 15.0, 0.0, step=0.5) / 100
 
 # Cap Compliance Check (Initial)
-# Note: 2026-27 concessional cap is $32,500
 CONCESSIONAL_CAP = 32500
 employer_cont_init = salary * employer_rate
 initial_sacrifice_amount = salary * sacrifice_percentage
@@ -47,44 +47,55 @@ insurance_premium = st.sidebar.number_input("Annual Insurance Premiums ($)", val
 lump_sum = st.sidebar.number_input("One-off Lump Sum Injection ($)", value=0, step=1000)
 lump_sum_year = st.sidebar.number_input("Year of Lump Sum Injection", value=1, min_value=1, max_value=time_horizon, step=1)
 
-# Calculations
+# Calculations (Fortnightly Model)
+num_periods = time_horizon * 26
+fortnightly_return = (1 + cust_return) ** (1 / 26) - 1
+fortnightly_inflation = (1 + inflation_rate) ** (1 / 26) - 1
+
 data = []
 current_bal = starting_balance
-curr_salary = salary
-curr_sacrifice = initial_sacrifice_amount
 cumulative_contributions = 0
 
-for yr in range(1, time_horizon + 1):
-    # Grow salary and sacrifice for this year
-    curr_salary *= (1 + salary_growth)
-    curr_sacrifice *= (1 + contribution_growth)
+# Track yearly variables
+curr_salary = salary
+curr_sacrifice_annual = initial_sacrifice_amount
+
+for period in range(1, num_periods + 1):
+    # Update annual stats at the start of each year (every 26 periods)
+    if period % 26 == 1 and period > 1:
+        curr_salary *= (1 + salary_growth)
+        curr_sacrifice_annual *= (1 + contribution_growth)
+
+    # Pro-rate annual figures for this period
+    period_salary = curr_salary / 26
+    period_sacrifice = curr_sacrifice_annual / 26
+    employer_cont = period_salary * employer_rate
+    period_admin_fee = admin_fee / 26
+    period_insurance = insurance_premium / 26
+    period_extra = extra_contribution / 26
     
-    # Calculate current employer contribution
-    employer_cont = curr_salary * employer_rate
+    # Check for Lump Sum (applied at start of the designated year)
+    injection = lump_sum if (period - 1) // 26 + 1 == lump_sum_year and period % 26 == 1 else 0
     
-    # Determine if lump sum applies
-    injection = lump_sum if yr == lump_sum_year else 0
+    # Track contributions
+    cumulative_contributions += (employer_cont + period_sacrifice + period_extra)
     
-    # Calculate contributions for cumulative tracking
-    # (Employer + Sacrifice + Extra)
-    annual_raw_contributions = employer_cont + curr_sacrifice + extra_contribution
-    cumulative_contributions += annual_raw_contributions
+    # Net contribution calculation
+    net_cont = ((employer_cont + period_sacrifice) * 0.85) - period_admin_fee - period_insurance + period_extra
     
-    # Deduct costs, add net concessional (15% tax) + after-tax extra contribution
-    net_cont = ((employer_cont + curr_sacrifice) * 0.85) - admin_fee - insurance_premium + extra_contribution
+    # Apply growth
+    current_bal = (current_bal + net_cont + injection) * (1 + fortnightly_return)
     
-    # Apply growth (including injection)
-    current_bal = (current_bal + net_cont + injection) * (1 + cust_return)
-    
-    # Inflation discount
-    real_bal = current_bal / ((1 + inflation_rate) ** yr)
-    
-    data.append({
-        "Year": yr,
-        "Nominal Balance ($)": current_bal,
-        "Real Purchasing Power ($)": real_bal,
-        "Cumulative Contributions ($)": cumulative_contributions
-    })
+    # Record data every year end
+    if period % 26 == 0:
+        yr = period // 26
+        real_bal = current_bal / ((1 + inflation_rate) ** yr)
+        data.append({
+            "Year": yr,
+            "Nominal Balance ($)": current_bal,
+            "Real Purchasing Power ($)": real_bal,
+            "Cumulative Contributions ($)": cumulative_contributions
+        })
 
 df = pd.DataFrame(data)
 
