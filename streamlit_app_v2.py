@@ -33,7 +33,13 @@ else:
     st.sidebar.success(f"Initial Total Concessional Contribution: ${total_concessional_init:,.0f}")
 
 st.sidebar.markdown("---")
-st.sidebar.header("Adjustment Sliders")
+st.sidebar.header("Stress Testing & Adjustments")
+stress_test_toggle = st.sidebar.toggle("Enable Market Volatility Stress Test", value=False)
+if stress_test_toggle:
+    volatility_slider = st.sidebar.slider("Market Volatility (%)", 0, 30, 15) / 100
+else:
+    volatility_slider = 0
+
 salary_growth = st.sidebar.slider("Annual Salary Increase (%)", 0.0, 10.0, 3.0) / 100
 contribution_growth = st.sidebar.slider("Annual Sacrifice Increase (%)", 0.0, 10.0, 3.0) / 100
 extra_contribution = st.sidebar.slider("Extra After-Tax Contribution ($)", 0, 50000, 0, step=1000)
@@ -49,8 +55,8 @@ lump_sum_year = st.sidebar.number_input("Year of Lump Sum Injection", value=1, m
 
 # Calculations (Fortnightly Model)
 num_periods = time_horizon * 26
-fortnightly_return = (1 + cust_return) ** (1 / 26) - 1
-fortnightly_inflation = (1 + inflation_rate) ** (1 / 26) - 1
+fortnightly_mean_return = (1 + cust_return) ** (1 / 26) - 1
+fortnightly_volatility = volatility_slider / np.sqrt(26) # Annual volatility scaled to fortnight
 
 data = []
 current_bal = starting_balance
@@ -74,7 +80,7 @@ for period in range(1, num_periods + 1):
     period_insurance = insurance_premium / 26
     period_extra = extra_contribution / 26
     
-    # Check for Lump Sum (applied at start of the designated year)
+    # Check for Lump Sum
     injection = lump_sum if (period - 1) // 26 + 1 == lump_sum_year and period % 26 == 1 else 0
     
     # Track contributions
@@ -83,7 +89,13 @@ for period in range(1, num_periods + 1):
     # Net contribution calculation
     net_cont = ((employer_cont + period_sacrifice) * 0.85) - period_admin_fee - period_insurance + period_extra
     
-    # Apply growth
+    # Apply growth with optional stress testing
+    if stress_test_toggle:
+        # Normal distribution centered around mean return with user-defined volatility
+        fortnightly_return = np.random.normal(fortnightly_mean_return, fortnightly_volatility)
+    else:
+        fortnightly_return = fortnightly_mean_return
+        
     current_bal = (current_bal + net_cont + injection) * (1 + fortnightly_return)
     
     # Record data every year end
