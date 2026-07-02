@@ -12,7 +12,7 @@ st.sidebar.header("Standard Assumptions")
 starting_balance = st.sidebar.number_input("Starting Balance ($)", value=100000, step=1000)
 salary = st.sidebar.number_input("Annual Salary ($)", value=100000, step=1000)
 employer_rate = st.sidebar.slider("Employer SGC Rate (%)", 10.0, 18.0, 11.5, step=0.5) / 100
-sacrifice_percentage = st.sidebar.slider("Salary Sacrifice (%)", 0.0, 100.0, 0.0, step=0.5) / 100
+sacrifice_percentage = st.sidebar.slider("Salary Sacrifice (%)", 0.0, 15.0, 0.0, step=0.5) / 100
 
 # Cap Compliance Check (Initial)
 employer_cont_init = salary * employer_rate
