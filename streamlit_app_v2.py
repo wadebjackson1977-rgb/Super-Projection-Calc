@@ -13,7 +13,7 @@ starting_balance = st.sidebar.number_input("Starting Balance ($)", value=100000,
 gross_contribution = st.sidebar.number_input("Gross Annual Contribution ($)", value=25000, step=500)
 
 st.sidebar.markdown("---")
-st.sidebar.header("Adjustment Sliders")
+st.sidebar.header("Contributions/Returns")
 contribution_growth = st.sidebar.slider("Annual Contribution Growth (%)", 0.0, 10.0, 3.0) / 100
 extra_contribution = st.sidebar.slider("Extra After-Tax Contribution ($)", 0, 26000, 0, step=250)
 time_horizon = st.sidebar.slider("Time Horizon (Years)", 5, 30, 10)
