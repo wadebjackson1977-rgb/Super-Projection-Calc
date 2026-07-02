@@ -18,7 +18,7 @@ time_horizon = retirement_age - current_age
 st.sidebar.markdown(f"**Time Horizon:** {time_horizon} years")
 
 employer_rate = st.sidebar.slider("Employer SGC Rate (%)", 10.0, 18.0, 11.5, step=0.5) / 100
-sacrifice_percentage = st.sidebar.slider("Salary Sacrifice (%)", 0.0, 100.0, 0.0, step=0.5) / 100
+sacrifice_percentage = st.sidebar.slider("Salary Sacrifice (%)", 0.0, 15.0, 0.0, step=0.5) / 100
 
 # Cap Compliance Check (Initial)
 employer_cont_init = salary * employer_rate
