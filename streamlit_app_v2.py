@@ -21,8 +21,8 @@ inflation_rate = st.sidebar.slider("Annual Inflation Rate (%)", 0.0, 5.0, 3.0) /
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("Advanced Settings")
-admin_fee = st.sidebar.number_input("Annual Admin Fee ($)", value=100, step=10)
-insurance_premium = st.sidebar.number_input("Annual Insurance Premiums ($)", value=250, step=10)
+admin_fee = st.sidebar.number_input("Annual Admin Fee ($)", value=560, step=10)
+insurance_premium = st.sidebar.number_input("Annual Insurance Premiums ($)", value=2220, step=50)
 lump_sum = st.sidebar.number_input("One-off Lump Sum Injection ($)", value=0, step=1000)
 lump_sum_year = st.sidebar.number_input("Year of Lump Sum Injection", value=1, min_value=1, max_value=time_horizon, step=1)
 
