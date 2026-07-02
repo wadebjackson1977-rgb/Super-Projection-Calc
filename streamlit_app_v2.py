@@ -7,10 +7,37 @@ st.set_page_config(page_title="Wade's Super Calculator", layout="wide")
 st.title("Wade's Superannuation Projection Calculator")
 st.markdown("Project your super balance factoring in SGC scaling, salary growth, and compliance.")
 
+# Dictionary of Annual Salaries (Fortnightly * 26) - 2026/27 Rates
+pay_scale = {
+    "Constable 1": 3009.10 * 26,
+    "Constable 2": 3096.20 * 26,
+    "Constable 3": 3229.00 * 26,
+    "Constable 4": 3361.50 * 26,
+    "Constable 5": 3547.10 * 26,
+    "Constable 6": 3699.90 * 26,
+    "Senior Constable 1": 3699.90 * 26,
+    "Senior Constable 2": 3785.10 * 26,
+    "Senior Constable 3": 3872.50 * 26,
+    "Senior Constable 4": 3961.90 * 26,
+    "Senior Constable 5": 4052.30 * 26,
+    "Senior Constable 6": 4145.50 * 26,
+    "Senior Constable 7": 4241.30 * 26,
+    "Senior Constable 8": 4338.70 * 26,
+    "Senior Constable 9": 4438.10 * 26,
+    "Senior Constable 10": 4527.80 * 26,
+}
+
 # Sidebar Controls
 st.sidebar.header("Standard Assumptions")
+pay_point = st.sidebar.selectbox("Select QPS Paypoint (26/27)", options=list(pay_scale.keys()))
+base_salary = pay_scale[pay_point]
+
+osa_toggle = st.sidebar.toggle("Include OSA (21%)", value=True)
+salary = base_salary * 1.21 if osa_toggle else base_salary
+
+st.sidebar.write(f"**Calculated Annual Salary:** ${salary:,.0f}")
+
 starting_balance = st.sidebar.number_input("Starting Balance ($)", value=100000, step=1000)
-salary = st.sidebar.number_input("Annual Salary ($)", value=100000, step=1000)
 current_age = st.sidebar.slider("Current Age", 18, 75, 30)
 retirement_age = st.sidebar.slider("Retirement Age", current_age, 85, 60)
 time_horizon = retirement_age - current_age
