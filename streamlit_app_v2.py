@@ -25,8 +25,8 @@ employer_cont_init = salary * employer_rate
 initial_sacrifice_amount = salary * sacrifice_percentage
 total_concessional_init = initial_sacrifice_amount + employer_cont_init
 
-if total_concessional_init > 30000:
-    st.sidebar.error(f"⚠️ Initial Total Concessional Contribution (${total_concessional_init:,.0f}) exceeds the $30,000 cap!")
+if total_concessional_init > 32500:
+    st.sidebar.error(f"⚠️ Initial Total Concessional Contribution (${total_concessional_init:,.0f}) exceeds the $32,500 cap!")
 else:
     st.sidebar.success(f"Initial Total Concessional Contribution: ${total_concessional_init:,.0f}")
 
