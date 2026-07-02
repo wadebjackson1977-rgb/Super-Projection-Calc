@@ -30,12 +30,17 @@ pay_scale = {
 # Sidebar Controls
 st.sidebar.header("Standard Assumptions")
 pay_point = st.sidebar.selectbox("Select QPS Paypoint (26/27)", options=list(pay_scale.keys()))
-base_salary = pay_scale[pay_point]
-
 osa_toggle = st.sidebar.toggle("Include OSA (21%)", value=True)
-salary = base_salary * 1.21 if osa_toggle else base_salary
 
-st.sidebar.write(f"**Calculated Annual Salary:** ${salary:,.0f}")
+# Logic to handle syncing the salary from the dropdown
+if 'salary' not in st.session_state:
+    st.session_state.salary = pay_scale[pay_point] * 1.21
+
+if st.sidebar.button("Update Salary from Paypoint"):
+    st.session_state.salary = pay_scale[pay_point] * (1.21 if osa_toggle else 1)
+
+salary = st.sidebar.number_input("Annual Salary ($)", value=st.session_state.salary, step=1000)
+st.session_state.salary = salary # Keep session state updated for manual overrides
 
 starting_balance = st.sidebar.number_input("Starting Balance ($)", value=100000, step=1000)
 current_age = st.sidebar.slider("Current Age", 18, 75, 30)
@@ -47,7 +52,7 @@ st.sidebar.markdown(f"**Time Horizon:** {time_horizon} years")
 employer_rate = st.sidebar.slider("Employer SGC Rate (%)", 10.0, 18.0, 11.5, step=0.5) / 100
 sacrifice_percentage = st.sidebar.slider("Salary Sacrifice (%)", 0.0, 15.0, 0.0, step=0.5) / 100
 
-# Cap Compliance Check (Initial)
+# Cap Compliance Check
 # Note: 2026-27 concessional cap is $32,500
 CONCESSIONAL_CAP = 32500
 employer_cont_init = salary * employer_rate
