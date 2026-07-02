@@ -4,7 +4,7 @@ import pandas as pd
 # Page Config
 st.set_page_config(page_title="Advanced Super Calculator", layout="wide")
 
-st.title("Advanced Superannuation Projection Calculator")
+st.title("Wade's Superannuation Projection Calculator")
 st.markdown("Project your super balance factoring in real-world costs and timing.")
 
 # Sidebar Controls
