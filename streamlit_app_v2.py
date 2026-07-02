@@ -11,17 +11,20 @@ st.markdown("Project your super balance factoring in real-world costs and timing
 st.sidebar.header("Standard Assumptions")
 starting_balance = st.sidebar.number_input("Starting Balance ($)", value=100000, step=1000)
 gross_contribution = st.sidebar.number_input("Gross Annual Contribution ($)", value=25000, step=500)
-contribution_growth = st.sidebar.slider("Annual Contribution Growth (%)", 0.0, 10.0, 3.0) / 100
-time_horizon = st.sidebar.slider("Time Horizon (Years)", 5, 30, 10)
 
 st.sidebar.markdown("---")
-st.sidebar.header("Advanced Settings")
+st.sidebar.header("Adjustment Sliders")
+contribution_growth = st.sidebar.slider("Annual Contribution Growth (%)", 0.0, 10.0, 3.0) / 100
+time_horizon = st.sidebar.slider("Time Horizon (Years)", 5, 30, 10)
+cust_return = st.sidebar.slider("Return Rate (%)", 0.0, 20.0, 10.07) / 100
+inflation_rate = st.sidebar.slider("Annual Inflation Rate (%)", 0.0, 5.0, 3.0) / 100
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("Advanced Settings")
 admin_fee = st.sidebar.number_input("Annual Admin Fee ($)", value=100, step=10)
 insurance_premium = st.sidebar.number_input("Annual Insurance Premiums ($)", value=250, step=10)
 lump_sum = st.sidebar.number_input("One-off Lump Sum Injection ($)", value=0, step=1000)
 lump_sum_year = st.sidebar.number_input("Year of Lump Sum Injection", value=1, min_value=1, max_value=time_horizon, step=1)
-cust_return = st.sidebar.slider("Return Rate (%)", 0.0, 20.0, 10.07) / 100
-inflation_rate = st.sidebar.slider("Annual Inflation Rate (%)", 0.0, 5.0, 3.0) / 100
 
 # Calculations
 data = []
