@@ -11,16 +11,22 @@ st.markdown("Project your super balance factoring in SGC scaling, salary growth,
 st.sidebar.header("Standard Assumptions")
 starting_balance = st.sidebar.number_input("Starting Balance ($)", value=100000, step=1000)
 salary = st.sidebar.number_input("Annual Salary ($)", value=100000, step=1000)
-employer_rate = st.sidebar.slider("Employer Contribution Rate (%)", 10.0, 18.0, 11.5, step=0.5) / 100
-sacrifice_percentage = st.sidebar.slider("Salary Sacrificed Contribution (%)", 0.0, 15.0, 0.0, step=0.5) / 100
+current_age = st.sidebar.slider("Current Age", 18, 75, 30)
+retirement_age = st.sidebar.slider("Retirement Age", current_age, 85, 60)
+time_horizon = retirement_age - current_age
+
+st.sidebar.markdown(f"**Time Horizon:** {time_horizon} years")
+
+employer_rate = st.sidebar.slider("Employer SGC Rate (%)", 10.0, 18.0, 11.5, step=0.5) / 100
+sacrifice_percentage = st.sidebar.slider("Salary Sacrifice (%)", 0.0, 100.0, 0.0, step=0.5) / 100
 
 # Cap Compliance Check (Initial)
 employer_cont_init = salary * employer_rate
 initial_sacrifice_amount = salary * sacrifice_percentage
 total_concessional_init = initial_sacrifice_amount + employer_cont_init
 
-if total_concessional_init > 32500:
-    st.sidebar.error(f"⚠️ Initial Total Concessional Contribution (${total_concessional_init:,.0f}) exceeds the $32,500 cap!")
+if total_concessional_init > 30000:
+    st.sidebar.error(f"⚠️ Initial Total Concessional Contribution (${total_concessional_init:,.0f}) exceeds the $30,000 cap!")
 else:
     st.sidebar.success(f"Initial Total Concessional Contribution: ${total_concessional_init:,.0f}")
 
@@ -29,7 +35,6 @@ st.sidebar.header("Adjustment Sliders")
 salary_growth = st.sidebar.slider("Annual Salary Increase (%)", 0.0, 10.0, 3.0) / 100
 contribution_growth = st.sidebar.slider("Annual Sacrifice Increase (%)", 0.0, 10.0, 3.0) / 100
 extra_contribution = st.sidebar.slider("Extra After-Tax Contribution ($)", 0, 50000, 0, step=1000)
-time_horizon = st.sidebar.slider("Time Horizon (Years)", 5, 30, 10)
 cust_return = st.sidebar.slider("Return Rate (%)", 0.0, 20.0, 10.07) / 100
 inflation_rate = st.sidebar.slider("Annual Inflation Rate (%)", 0.0, 5.0, 3.0) / 100
 
